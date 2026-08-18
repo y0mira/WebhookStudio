@@ -1,17 +1,22 @@
 # Webhook Studio
 
-Webhook Studio is a local-first, self-hosted Webhook debugger. This MVP closes one workflow: create an endpoint, capture HTTP requests in SQLite, inspect them live in the browser, and replay the original request to a target URL.
+Webhook Studio is a local-first, self-hosted webhook debugger. Create an endpoint, capture HTTP requests in SQLite, inspect and compare them live in the browser, then replay or export them without sending traffic to a third-party service.
 
 > **Security warning:** this release is for local development only. Do not expose it directly to the public internet. Replay validates only that the target is an absolute `http` or `https` URL; private-network blocking is planned for a later phase.
 
-## MVP scope
+## Current scope
 
 - Endpoint create/list/view/delete
 - Any common HTTP method at `/hooks/{slug}/{remainingPath}`
 - Raw body and multi-value header capture, limited to 1 MiB
 - Latest-first paginated request history and SignalR live updates
+- Server-side method, status, time, path, query, and text-body filters stored in the URL
+- Per-endpoint response status, content type, text body, delay, and retention settings
+- Structured request comparison, including JSON field-level differences
 - JSON/text/binary-aware request inspection, copy info, and copy curl
 - Request replay with method, body, and content headers; connection-level headers are removed
+- Versioned endpoint JSON import/export and per-request HAR export; sensitive headers are redacted by default
+- Light/dark themes and responsive 375px-to-desktop workspace layouts
 - Problem Details API errors, OpenAPI at `/swagger`, and `/health`
 
 Authentication, multi-tenancy, plugins, cloud sync, queues, and public-internet hardening are intentionally outside this MVP.

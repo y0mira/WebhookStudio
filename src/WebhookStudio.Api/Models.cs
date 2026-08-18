@@ -8,6 +8,11 @@ public sealed class Endpoint
     public required string Name { get; set; }
     public required string Slug { get; set; }
     public DateTime CreatedAtUtc { get; set; }
+    public int ResponseStatusCode { get; set; } = 200;
+    public string ResponseContentType { get; set; } = "application/json";
+    public string ResponseBody { get; set; } = "{\"received\":true}";
+    public int ResponseDelayMs { get; set; }
+    public int RetentionLimit { get; set; } = 500;
     public List<CapturedRequest> Requests { get; set; } = [];
 }
 
@@ -24,6 +29,8 @@ public sealed class CapturedRequest
     public string? RemoteIp { get; set; }
     public DateTime ReceivedAtUtc { get; set; }
     public long BodySize { get; set; }
+    public string? BodyText { get; set; }
+    public int ResponseStatusCode { get; set; } = 200;
     public List<ReplayAttempt> ReplayAttempts { get; set; } = [];
 }
 
@@ -57,6 +64,8 @@ public sealed class StudioDbContext(DbContextOptions<StudioDbContext> options) :
         modelBuilder.Entity<CapturedRequest>(b =>
         {
             b.HasIndex(x => new { x.EndpointId, x.ReceivedAtUtc });
+            b.HasIndex(x => new { x.EndpointId, x.Method, x.ReceivedAtUtc });
+            b.Property(x => x.BodyText).HasMaxLength(1024 * 1024);
             b.HasOne(x => x.Endpoint).WithMany(x => x.Requests).HasForeignKey(x => x.EndpointId).OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<ReplayAttempt>(b =>

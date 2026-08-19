@@ -13,7 +13,8 @@ var packagedContentRoot = Directory.Exists(Path.Combine(AppContext.BaseDirectory
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions { Args = args, ContentRootPath = packagedContentRoot });
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
-var configuredUrls = builder.Configuration["urls"] ?? builder.Configuration["ASPNETCORE_URLS"] ?? "http://127.0.0.1:8080";
+var configuredUrls = builder.Configuration["urls"] ?? builder.Configuration["ASPNETCORE_URLS"] ?? builder.Configuration["Hosting:Url"] ?? "http://127.0.0.1:8090";
+var openBrowserOnStart = builder.Configuration.GetValue("Hosting:OpenBrowserOnStart", true);
 builder.WebHost.UseUrls(configuredUrls);
 builder.Services.AddOptions<StudioOptions>().Bind(builder.Configuration.GetSection(StudioOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
 var configuredConnection = builder.Configuration.GetConnectionString("Studio");
@@ -192,7 +193,7 @@ var publicUrl = configuredUrls.Split(';')[0];
 app.Lifetime.ApplicationStarted.Register(() =>
 {
     Console.WriteLine($"Webhook Studio 0.1.0\nManagement UI: {publicUrl}\nWebhook base: {publicUrl}/hooks/{{slug}}/\nDatabase: {dataDirectory}\nStop: Ctrl+C");
-    if (args.Contains("--open-browser", StringComparer.OrdinalIgnoreCase) && Environment.UserInteractive) try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(publicUrl) { UseShellExecute = true }); } catch (Exception ex) { app.Logger.LogWarning("Could not open the browser: {Reason}", ex.Message); }
+    if ((openBrowserOnStart || args.Contains("--open-browser", StringComparer.OrdinalIgnoreCase)) && Environment.UserInteractive && !app.Environment.IsEnvironment("Testing")) try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(publicUrl) { UseShellExecute = true }); } catch (Exception ex) { app.Logger.LogWarning("Could not open the browser: {Reason}", ex.Message); }
 });
 app.Run();
 

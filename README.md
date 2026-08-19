@@ -21,10 +21,10 @@ Webhook Studio 是本地优先、单进程运行的开源 Webhook 调试器：�
 
 ### Windows 发布包
 
-解压 `WebhookStudio-v0.1.0-win-x64.zip`，双击 `WebhookStudio.exe`，然后打开控制台显示的 `http://127.0.0.1:8080`。也可运行：
+解压 `WebhookStudio-v0.1.0-win-x64.zip` 后双击 `WebhookStudio.exe`。服务启动成功后会自动打开 `http://127.0.0.1:8090`，不需要分别启动前端。也可运行：
 
 ```powershell
-./WebhookStudio.exe --open-browser
+./WebhookStudio.exe
 ```
 
 发布包已包含 React 页面和 .NET Runtime，不需要 Node.js、Vite 或另一个后端进程。数据默认位于 `%LOCALAPPDATA%\WebhookStudio`，移动程序目录不会移动用户数据。
@@ -56,7 +56,7 @@ cd ../..
 创建 slug 为 `demo` 的 Endpoint：
 
 ```powershell
-curl.exe -X POST "http://127.0.0.1:8080/hooks/demo/orders?source=example" -H "Content-Type: application/json" -d '{"orderId":42,"status":"paid"}'
+curl.exe -X POST "http://127.0.0.1:8090/hooks/demo/orders?source=example" -H "Content-Type: application/json" -d '{"orderId":42,"status":"paid"}'
 ```
 
 ## 配置
@@ -65,7 +65,9 @@ curl.exe -X POST "http://127.0.0.1:8080/hooks/demo/orders?source=example" -H "Co
 
 | 配置 | 默认值 | 范围/说明 |
 |---|---:|---|
-| `ASPNETCORE_URLS` | `http://127.0.0.1:8080` | 非 loopback 绑定会扩大访问面 |
+| `Hosting.Url` | `http://127.0.0.1:8090` | 在 EXE 同目录的 `appsettings.json` 中修改端口；非 loopback 绑定会扩大访问面 |
+| `Hosting.OpenBrowserOnStart` | `true` | 双击启动后自动打开管理页面；设为 `false` 可关闭 |
+| `ASPNETCORE_URLS` | 未设置 | 环境变量覆盖 `Hosting.Url` |
 | `ConnectionStrings__Studio` | 操作系统用户数据目录 | SQLite 连接字符串 |
 | `WebhookStudio__MaxBodyBytes` | 1048576 | 1024–10485760 |
 | `WebhookStudio__DefaultRetentionLimit` | 500 | 10–10000 |
@@ -99,6 +101,6 @@ cd ../..
 ./scripts/test-e2e.ps1 -NoPause
 ```
 
-架构见 [docs/architecture.md](docs/architecture.md)，贡献见 [CONTRIBUTING.md](CONTRIBUTING.md)，安全报告见 [SECURITY.md](SECURITY.md)。0.1.x 属于 pre-1.0：公开 API 和导入格式的破坏性变化会在变更日志中说明。路线图只包含安全修复、可访问性和发布可靠性改进；账号、云隧道、多租户和脚本执行不在当前范围。
+详细文档：[项目介绍](docs/project-introduction.md)、[操作手册](docs/user-manual.md)、[架构说明](docs/architecture.md)。贡献见 [CONTRIBUTING.md](CONTRIBUTING.md)，安全报告见 [SECURITY.md](SECURITY.md)。0.1.x 属于 pre-1.0：公开 API 和导入格式的破坏性变化会在变更日志中说明。路线图只包含安全修复、可访问性和发布可靠性改进；账号、云隧道、多租户和脚本执行不在当前范围。
 
 许可证：[MIT](LICENSE)。

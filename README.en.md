@@ -21,10 +21,10 @@ Screenshots are not committed yet. To capture them, run the production single pr
 
 ### Windows release archive
 
-Extract `WebhookStudio-v0.1.0-win-x64.zip`, double-click `WebhookStudio.exe`, and open the displayed `http://127.0.0.1:8080`. Or run:
+Extract `WebhookStudio-v0.1.0-win-x64.zip` and double-click `WebhookStudio.exe`. Once listening, it automatically opens `http://127.0.0.1:8090`; no separate frontend process is required. Or run:
 
 ```powershell
-./WebhookStudio.exe --open-browser
+./WebhookStudio.exe
 ```
 
 The archive contains the React application and .NET runtime. It does not need Node.js, Vite, or a second backend process. Data defaults to `%LOCALAPPDATA%\WebhookStudio`, so moving the program does not move user data.
@@ -56,7 +56,7 @@ Development uses Vite at `http://localhost:5173` and the API at `http://localhos
 Create an endpoint with slug `demo`:
 
 ```powershell
-curl.exe -X POST "http://127.0.0.1:8080/hooks/demo/orders?source=example" -H "Content-Type: application/json" -d '{"orderId":42,"status":"paid"}'
+curl.exe -X POST "http://127.0.0.1:8090/hooks/demo/orders?source=example" -H "Content-Type: application/json" -d '{"orderId":42,"status":"paid"}'
 ```
 
 ## Configuration
@@ -65,7 +65,9 @@ Environment variables use double underscores, for example `WebhookStudio__MaxBod
 
 | Setting | Default | Range/notes |
 |---|---:|---|
-| `ASPNETCORE_URLS` | `http://127.0.0.1:8080` | Non-loopback binding expands exposure |
+| `Hosting.Url` | `http://127.0.0.1:8090` | Change the port in `appsettings.json` beside the executable; non-loopback binding expands exposure |
+| `Hosting.OpenBrowserOnStart` | `true` | Automatically opens the management UI after a double-click launch; set to `false` to disable |
+| `ASPNETCORE_URLS` | unset | Environment-variable override for `Hosting.Url` |
 | `ConnectionStrings__Studio` | OS user data directory | SQLite connection string |
 | `WebhookStudio__MaxBodyBytes` | 1048576 | 1024–10485760 |
 | `WebhookStudio__DefaultRetentionLimit` | 500 | 10–10000 |

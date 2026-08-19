@@ -1,0 +1,14 @@
+name: Bug report
+description: Report a reproducible problem
+body:
+  - type: textarea
+    attributes: { label: What happened? }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Steps to reproduce }
+    validations: { required: true }
+  - type: input
+    attributes: { label: Version and operating system }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Sanitized logs, screenshots, or request samples }

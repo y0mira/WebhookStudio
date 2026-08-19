@@ -11,9 +11,9 @@ public sealed record PagedResponse<T>(IReadOnlyList<T> Items, int Page, int Page
 public sealed record RequestDetail(Guid Id, Guid EndpointId, string Method, string PathAndQuery,
     Dictionary<string, string[]> Headers, string BodyBase64, string? ContentType, string? RemoteIp,
     DateTime ReceivedAtUtc, long BodySize);
-public sealed record ReplayResponse(Guid Id, int? StatusCode, long DurationMs, bool Succeeded, string? Error, DateTime CreatedAtUtc);
+public sealed record ReplayResponse(Guid Id, int? StatusCode, long DurationMs, bool Succeeded, string? Error, string? Code, DateTime CreatedAtUtc);
 public sealed record ExportPackage(int Version, EndpointResponse Endpoint, IReadOnlyList<ExportedRequest> Requests);
-public sealed record ExportedRequest(Guid Id, string Method, string PathAndQuery, Dictionary<string,string[]> Headers, string BodyBase64, string? ContentType, DateTime ReceivedAtUtc, int ResponseStatusCode);
+public sealed record ExportedRequest(Guid Id, string Method, string PathAndQuery, Dictionary<string, string[]> Headers, string BodyBase64, string? ContentType, DateTime ReceivedAtUtc, int ResponseStatusCode);
 public sealed record ImportResult(int Imported, int Skipped);
 public sealed record CompareRequest(Guid LeftId, Guid RightId);
 public sealed record DiffItem(string Path, string Kind, string? Left, string? Right);

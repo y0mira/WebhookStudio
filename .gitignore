@@ -15,5 +15,6 @@ test-results/
 .playwright/
 *.user
 *.tsbuildinfo
+artifacts/
 src/WebhookStudio.Web/vite.config.js
 src/WebhookStudio.Web/vite.config.d.ts

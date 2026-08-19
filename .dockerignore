@@ -1,0 +1,11 @@
+.git
+.github
+**/bin
+**/obj
+**/node_modules
+**/test-results
+**/.playwright
+artifacts
+*.db
+*.db-shm
+*.db-wal

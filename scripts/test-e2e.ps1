@@ -22,14 +22,19 @@ try {
     try {
         npm run build
         Assert-LastCommand 'The frontend build failed'
+        dotnet build "$root/WebhookStudio.sln" --no-restore
+        Assert-LastCommand 'The .NET build after frontend assets failed'
 
-        $apiPath = "$root/src/WebhookStudio.Api/bin/Debug/net8.0/WebhookStudio.Api.exe"
-        $api = Start-Process $apiPath -ArgumentList '--urls','http://localhost:5080' -WorkingDirectory "$root/src/WebhookStudio.Api" -WindowStyle Hidden -PassThru
+        $apiPath = "$root/src/WebhookStudio.Api/bin/Debug/net8.0/WebhookStudio.exe"
+        $env:ASPNETCORE_URLS='http://127.0.0.1:5080'
+        $env:WebhookStudio__AllowPrivateNetworkReplay='true'
+        $env:ConnectionStrings__Studio="Data Source=$root/src/WebhookStudio.Api/data/test-e2e.db;Foreign Keys=True;Default Timeout=5"
+        $api = Start-Process $apiPath -WorkingDirectory "$root/src/WebhookStudio.Api" -WindowStyle Hidden -PassThru
         $healthy = $false
         for ($attempt = 0; $attempt -lt 40; $attempt++) {
             if ($api.HasExited) { throw "The API stopped during startup (exit code $($api.ExitCode))." }
             try {
-                Invoke-RestMethod 'http://localhost:5080/health' | Out-Null
+                Invoke-RestMethod 'http://127.0.0.1:5080/health/ready' | Out-Null
                 $healthy = $true
                 break
             } catch { Start-Sleep -Milliseconds 250 }

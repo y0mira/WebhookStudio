@@ -16,5 +16,8 @@ test-results/
 *.user
 *.tsbuildinfo
 artifacts/
+01-mvp.md
+02-product.md
+03-open-source.md
 src/WebhookStudio.Web/vite.config.js
 src/WebhookStudio.Web/vite.config.d.ts

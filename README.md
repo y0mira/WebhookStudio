@@ -1,106 +1,125 @@
 # Webhook Studio
 
-[English](README.en.md) | 简体中文
+[English](README.en.md) | 简体中文 · [操作手册](docs/user-manual.md) · [架构说明](docs/architecture.md)
 
-Webhook Studio 是本地优先、单进程运行的开源 Webhook 调试器：接收、检查、过滤、比较、重放和导入导出请求，无需把数据发送给第三方。
+Webhook Studio 是一个本地优先、开源、单进程运行的 Webhook 调试工具。它在本机创建 Webhook 接收地址，帮助开发者接收、检查、筛选、比较、重放以及导入导出 HTTP 请求，数据无需发送给第三方服务。
 
-> 本项目没有认证系统，默认仅监听 `127.0.0.1`。捕获内容和数据库可能包含密钥，请按敏感数据保护。不要直接暴露到公网。
+> 项目当前没有身份认证，默认只监听 `127.0.0.1`。捕获内容和数据库可能包含密钥或业务数据，请勿直接暴露到公网。
 
-## 功能
+## 它解决什么问题
 
-- 任意本地 Endpoint、SQLite 持久化和 SignalR 实时请求流
-- 方法、状态、时间、路径、查询参数和文本 Body 的后端过滤
-- Header、JSON、文本和二进制安全检查；结构化 JSON 比较
-- 可配置响应、异步延迟、保留策略、curl/HAR/版本化 JSON
-- 默认脱敏敏感 Header，默认阻止本机、私网和危险重定向重放
-- 深浅主题，简体中文/英文即时切换，375px 至桌面响应式界面
+开发支付通知、消息回调、CI/CD 或第三方平台集成时，通常需要确认对方实际发送了什么。Webhook Studio 可以帮助你：
 
-截图尚未提交。拍摄步骤：以正式单进程模式启动，创建两个无敏感数据的示例请求，分别在 1440px 深色英文和 375px 浅色中文下截图，并在提交前检查图片元数据与内容。
+- 接收并实时查看 Webhook 的 Method、URL、Header、Query 和 Body。
+- 保存请求，稍后搜索、筛选或比较两次回调的差异。
+- 调整本地服务后重放已经捕获的请求。
+- 自定义 Webhook Endpoint 的响应状态、Body 和延迟。
+- 在本机保存调试数据，不依赖第三方 Webhook 收集服务。
 
-## 快速开始
+Webhook Studio 与 Postman、Apifox 的侧重点不同：Postman 和 Apifox 主要用于主动构造并发送 API 请求；Webhook Studio 主要用于被动接收外部系统发送的 Webhook，然后检查、比较和重放。
 
-### Windows 发布包
+## 核心功能
 
-解压 `WebhookStudio-v0.1.0-win-x64.zip` 后双击 `WebhookStudio.exe`。服务启动成功后会自动打开 `http://127.0.0.1:8090`，不需要分别启动前端。也可运行：
+### 接收和实时查看
 
-```powershell
-./WebhookStudio.exe
+- 使用名称和唯一 Slug 创建本地 Endpoint。
+- 接收 GET、POST、PUT、PATCH、DELETE、HEAD 和 OPTIONS。
+- 保存路径、查询参数、Header、Body、来源 IP、时间和响应状态。
+- 通过 SignalR 将新请求实时推送到浏览器。
+- 使用 SQLite 持久化，重启应用后数据仍然存在。
+
+### 检查、筛选和比较
+
+- 查看 JSON、文本和二进制 Body。
+- 按 HTTP Method、状态类别、时间和关键词筛选。
+- 对两条请求进行结构化比较，区分新增、删除和变化字段。
+- 复制请求信息和 curl，导出 HAR 文件。
+
+### 重放和响应配置
+
+- 将捕获请求重放到指定 HTTP 或 HTTPS 地址。
+- 显示目标响应状态、耗时和明确的失败原因。
+- 为每个 Endpoint 配置状态码、Content-Type、响应 Body、延迟和保留数量。
+- 默认阻止本机、私网和危险重定向，降低 SSRF 风险。
+
+### 数据与界面
+
+- Endpoint 数据支持版本化 JSON 导入和导出。
+- 简体中文与英文即时切换，语言偏好会保留。
+- 深色和浅色主题。
+- 适配手机、平板和桌面宽度。
+
+## 如何运行
+
+Windows 发布包解压后双击 `WebhookStudio.exe` 即可。应用成功监听后会自动打开浏览器，默认地址为：
+
+```text
+http://127.0.0.1:8090
 ```
 
-发布包已包含 React 页面和 .NET Runtime，不需要 Node.js、Vite 或另一个后端进程。数据默认位于 `%LOCALAPPDATA%\WebhookStudio`，移动程序目录不会移动用户数据。
+端口和自动打开行为可在 EXE 同目录的 `appsettings.json` 中修改：
 
-### Docker Compose
-
-```powershell
-docker compose up --build -d
+```json
+{
+  "Hosting": {
+    "Url": "http://127.0.0.1:8090",
+    "OpenBrowserOnStart": true
+  }
+}
 ```
 
-打开 `http://127.0.0.1:8080`。Compose 只映射 loopback，并用命名卷保存 `/data`。
+发布包包含 React 页面和 .NET Runtime，不需要另外安装 Node.js、Vite 或 .NET Runtime，也不需要分别启动前后端。
 
-### 源码开发
+完整的 Windows、macOS、Linux、Docker 安装步骤和功能操作见[操作手册](docs/user-manual.md)。
 
-需要 .NET SDK 8、Node.js 20 和 npm：
+## 支持的平台
 
-```powershell
-dotnet restore WebhookStudio.sln --configfile NuGet.Config
-cd src/WebhookStudio.Web
-npm ci
-cd ../..
-./scripts/dev.ps1
+| 平台 | 架构 | 发布标识 | 状态 |
+|---|---|---|---|
+| Windows | Intel/AMD 64 位 | `win-x64` | 已实际运行验收 |
+| Windows | ARM 64 位 | `win-arm64` | 已构建，未在对应设备运行 |
+| Linux | Intel/AMD 64 位 | `linux-x64` | 已构建，未在对应系统运行 |
+| Linux | ARM 64 位 | `linux-arm64` | 已构建，未在对应系统运行 |
+| macOS | Apple Silicon（M1/M2/M3/M4） | `osx-arm64` | 已构建，未在真实 Mac 运行 |
+
+目前没有 Intel Mac 的 `osx-x64` 发布包。
+
+## 架构
+
+正式版本只运行一个 ASP.NET Core 进程：
+
+```text
+浏览器 ──> React 静态页面 ──┐
+                             ├──> ASP.NET Core ──> EF Core ──> SQLite
+Webhook 发送方 ──> /hooks/... ┘          │
+                                         └──> SignalR 实时通知
 ```
 
-开发模式使用 `http://localhost:5173` 的 Vite 和 `http://localhost:5080` 的 API；这只用于热更新。正式构建始终由 ASP.NET Core 托管 React。
+- 前端：React、TypeScript、Vite。
+- 后端：ASP.NET Core 8 Minimal API。
+- 数据：SQLite 与 EF Core migrations。
+- 实时通信：SignalR。
+- 发布：self-contained 单文件程序、Docker 和 Docker Compose。
 
-## 捕获示例
+开发环境可以分别运行 Vite 和后端以获得热更新；正式发布时 React 已由 ASP.NET Core 托管。更多设计细节见[架构说明](docs/architecture.md)。
 
-创建 slug 为 `demo` 的 Endpoint：
+## 安全边界
 
-```powershell
-curl.exe -X POST "http://127.0.0.1:8090/hooks/demo/orders?source=example" -H "Content-Type: application/json" -d '{"orderId":42,"status":"paid"}'
-```
+- 默认仅监听 loopback，不向局域网或公网开放。
+- 重放默认禁止访问 localhost、私网、link-local、multicast、unspecified 和危险重定向。
+- DNS 在发送前和实际连接时都会校验，减少 DNS rebinding 风险。
+- Authorization、Cookie 等敏感 Header 默认不会随导出或重放发送。
+- 捕获 Body 和 Header 不写入应用日志，前端将其作为文本而不是 HTML 渲染。
+- SQLite 适合本地单实例，不适合高并发、多实例生产服务。
 
-## 配置
+安全问题请参阅 [SECURITY.md](SECURITY.md)。
 
-环境变量使用双下划线，例如 `WebhookStudio__MaxBodyBytes=2097152`。
+## 文档与参与贡献
 
-| 配置 | 默认值 | 范围/说明 |
-|---|---:|---|
-| `Hosting.Url` | `http://127.0.0.1:8090` | 在 EXE 同目录的 `appsettings.json` 中修改端口；非 loopback 绑定会扩大访问面 |
-| `Hosting.OpenBrowserOnStart` | `true` | 双击启动后自动打开管理页面；设为 `false` 可关闭 |
-| `ASPNETCORE_URLS` | 未设置 | 环境变量覆盖 `Hosting.Url` |
-| `ConnectionStrings__Studio` | 操作系统用户数据目录 | SQLite 连接字符串 |
-| `WebhookStudio__MaxBodyBytes` | 1048576 | 1024–10485760 |
-| `WebhookStudio__DefaultRetentionLimit` | 500 | 10–10000 |
-| `WebhookStudio__MaxHeaderCount` | 100 | 1–200 |
-| `WebhookStudio__MaxHeaderValueLength` | 8192 | 128–32768 |
-| `WebhookStudio__MaxPathLength` | 4096 | 128–16384 |
-| `WebhookStudio__AllowPrivateNetworkReplay` | false | 开启后 UI 持续警告 |
-| `WebhookStudio__MaxReplayRedirects` | 5 | 0–10 |
-| `WebhookStudio__ReplayTimeoutSeconds` | 15 | 1–120 |
-| `WebhookStudio__MaxReplayResponseBytes` | 1048576 | 1024–10485760 |
+- [操作手册](docs/user-manual.md)
+- [架构说明](docs/architecture.md)
+- [贡献指南](CONTRIBUTING.md)
+- [安全政策](SECURITY.md)
+- [变更记录](CHANGELOG.md)
 
-健康检查：`/health/live` 只表示进程存活，`/health/ready` 检查数据库。
-
-## 安全模型与限制
-
-重放仅允许无用户名密码的 HTTP/HTTPS URL；默认阻止 loopback、私网、link-local、multicast、unspecified、IPv4-mapped IPv6、DNS 解析到受限地址以及重定向到受限地址。连接时会再次解析和校验。启用私网重放只应用于可信本地开发，仍保留超时、重定向和响应上限。
-
-React 将 Body 和 Header 作为文本渲染。导出和重放默认删除 Authorization、Cookie 等敏感 Header。应用不会记录捕获 Body 或 Header。SQLite 启用 WAL、外键和 busy timeout，但不适合高并发、多实例生产服务。
-
-备份前停止应用，然后复制数据库及同目录的 `-wal`/`-shm` 文件；更稳妥的方式是停止后复制整个数据目录。恢复时先停止应用，保留原目录备份，再替换数据库文件。迁移只保证向前升级，不支持自动降级。
-
-## 测试、架构与路线图
-
-```powershell
-dotnet test WebhookStudio.sln
-cd src/WebhookStudio.Web
-npm run typecheck
-npm test
-npm run build
-cd ../..
-./scripts/test-e2e.ps1 -NoPause
-```
-
-详细文档：[项目介绍](docs/project-introduction.md)、[操作手册](docs/user-manual.md)、[架构说明](docs/architecture.md)。贡献见 [CONTRIBUTING.md](CONTRIBUTING.md)，安全报告见 [SECURITY.md](SECURITY.md)。0.1.x 属于 pre-1.0：公开 API 和导入格式的破坏性变化会在变更日志中说明。路线图只包含安全修复、可访问性和发布可靠性改进；账号、云隧道、多租户和脚本执行不在当前范围。
-
-许可证：[MIT](LICENSE)。
+当前版本为 `0.1.0`，属于 pre-1.0。项目使用 [MIT License](LICENSE)。

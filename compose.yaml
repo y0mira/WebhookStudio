@@ -1,0 +1,12 @@
+services:
+  webhook-studio:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - webhook-studio-data:/data
+    restart: unless-stopped
+    environment:
+      WebhookStudio__AllowPrivateNetworkReplay: "false"
+volumes:
+  webhook-studio-data:

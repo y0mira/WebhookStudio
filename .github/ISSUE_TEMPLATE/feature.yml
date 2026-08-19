@@ -1,0 +1,9 @@
+name: Feature request
+description: Suggest a scoped improvement
+body:
+  - type: textarea
+    attributes: { label: Problem to solve }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Proposed outcome }
+    validations: { required: true }
